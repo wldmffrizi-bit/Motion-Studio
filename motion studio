@@ -1,0 +1,40 @@
+
+name: Build Motion Studio APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Extract project
+        run: |
+          mkdir source
+          unzip -q MotionStudio-v0.2.0-CloudBuild.zip -d source
+
+      - name: Build APK
+        working-directory: source
+        run: gradle --no-daemon :app:assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MotionStudio-APK
+          path: source/app/build/outputs/apk/debug/app-debug.apk
